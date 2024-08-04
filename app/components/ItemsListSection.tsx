@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Item } from '@/types';
 import { PlusIcon, Trash2 } from 'lucide-react';
 
 type Props = {
@@ -21,8 +22,8 @@ const ItemsListSection = ({ form, fields, append, remove }: Props) => {
       <strong className="mb-4 block text-base font-[600] text-[#101828] sm:mb-6 sm:text-2xl">
         Items
       </strong>
-      {fields.map((item: any, index: any) => (
-        <div key={item.id} className="mb-8 flex flex-col gap-4 sm:mb-4 sm:flex-row sm:items-end">
+      {fields.map((item: Item, index: number) => (
+        <div key={item.id} className="mb-8 flex flex-col gap-4 sm:mb-4 sm:flex-row sm:items-start">
           <FormField
             control={form.control}
             name={`items.${index}.name`}
@@ -45,6 +46,7 @@ const ItemsListSection = ({ form, fields, append, remove }: Props) => {
                 <FormControl>
                   <Input
                     type="number"
+                    min={1}
                     {...field}
                     onChange={(e) => {
                       field.onChange(e);
@@ -65,6 +67,7 @@ const ItemsListSection = ({ form, fields, append, remove }: Props) => {
                 <FormControl>
                   <Input
                     type="number"
+                    min={1}
                     {...field}
                     onChange={(e) => {
                       field.onChange(e);
@@ -93,14 +96,16 @@ const ItemsListSection = ({ form, fields, append, remove }: Props) => {
               </FormItem>
             )}
           />
-          <Button
-            variant="ghost"
-            type="button"
-            onClick={() => remove(index)}
-            className="hidden sm:flex"
-          >
-            <Trash2 />
-          </Button>
+          <div className="relative top-8 flex">
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => remove(index)}
+              className="hidden sm:flex"
+            >
+              <Trash2 />
+            </Button>
+          </div>
           <Button
             variant="outline"
             type="button"
@@ -114,7 +119,7 @@ const ItemsListSection = ({ form, fields, append, remove }: Props) => {
       <Button
         className="w-full"
         type="button"
-        onClick={() => append({ name: '', quantity: 1, price: 0, total: 0 })}
+        onClick={() => append({ name: '', quantity: null, price: null, total: null })}
       >
         <PlusIcon size={20} className="mr-2" /> Add New Item
       </Button>

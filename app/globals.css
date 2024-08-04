@@ -66,6 +66,14 @@
   }
 }
 
+@layer utilities {
+  .preview-label {
+    @apply block text-base font-normal leading-[38px] text-[#76787D];
+  }
+  .preview-data {
+    @apply text-base font-medium leading-[38px] text-[#101828];
+  }
+}
 @layer components {
   label {
     @apply text-sm font-medium text-[#344054];
