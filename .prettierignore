@@ -1,6 +1,8 @@
 /*
 !/app
 !/constants
+!/lib
+!types.d.ts
 .next
 .cache
 package-lock.json

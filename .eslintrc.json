@@ -30,7 +30,13 @@
     "react/no-array-index-key": "off",
     "react/function-component-definition": "off",
     "react/jsx-no-constructed-context-values": "off",
-    "react/require-default-props": "off"
+    "react/require-default-props": "off",
+    "import/no-unresolved": [
+      "error",
+      {
+        "ignore": ["react-day-picker/style.css"]
+      }
+    ]
   },
   "parserOptions": {
     "ecmaFeatures": {

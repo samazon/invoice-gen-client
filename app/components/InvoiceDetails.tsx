@@ -40,7 +40,7 @@ const InvoiceDetails = ({ form }: Props) => {
                         !field.value && 'text-muted-foreground',
                       )}
                     >
-                      {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                      {field.value ? format(field.value, 'P') : <span>Pick a date</span>}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
