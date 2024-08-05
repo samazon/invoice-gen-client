@@ -57,7 +57,7 @@ const PreviewSection = ({
       <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:gap-6">
         <div className="flex w-full flex-col sm:w-1/2">
           <span className="preview-label">Invoice Date</span>
-          <span className="preview-data">{format(invoiceDate, 'P')}</span>
+          <span className="preview-data">{invoiceDate && format(invoiceDate, 'P')}</span>
         </div>
         <div className="flex w-full flex-col sm:w-1/2">
           <span className="preview-label">Payment Term</span>
