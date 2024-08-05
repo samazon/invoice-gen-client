@@ -20,7 +20,6 @@
     "no-undef": "off",
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "import/extensions": ["error", "ignorePackages"],
     "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
     "import/prefer-default-export": "off",
     "react/jsx-filename-extension": ["error", { "extensions": [".tsx"] }],
@@ -28,7 +27,16 @@
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
     "react/jsx-no-useless-fragment": "off",
-    "react/no-array-index-key": "off"
+    "react/no-array-index-key": "off",
+    "react/function-component-definition": "off",
+    "react/jsx-no-constructed-context-values": "off",
+    "react/require-default-props": "off",
+    "import/no-unresolved": [
+      "error",
+      {
+        "ignore": ["react-day-picker/style.css"]
+      }
+    ]
   },
   "parserOptions": {
     "ecmaFeatures": {
