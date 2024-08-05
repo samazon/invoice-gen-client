@@ -66,8 +66,9 @@ const CREATE_INVOICE = gql`
 
 function InvoiceForm() {
   const { countries } = useContext(CountriesContext);
-  const [subTotal, setSubTotal] = useState(0);
-  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [subTotal, setSubTotal] = useState<number>(0);
+  const [total, setTotal] = useState<number>(0);
 
   const form = useForm<z.infer<typeof InvoiceFormSchema>>({
     resolver: zodResolver(InvoiceFormSchema),
@@ -118,6 +119,7 @@ function InvoiceForm() {
     };
 
     try {
+      setIsLoading(true);
       const response = await createInvoice({ variables: invoiceData });
       if (Object.keys(response.data).length > 0) {
         toast(<ToastComponent />, {
@@ -131,6 +133,7 @@ function InvoiceForm() {
       toast('Error creating invoice', { type: 'error' });
     } finally {
       form.reset(InvoiceFormDefaults);
+      setIsLoading(false);
     }
   };
 
@@ -171,6 +174,7 @@ function InvoiceForm() {
         actions={
           <FormActions
             isMobile={false}
+            isLoading={Boolean(isLoading)}
             onClickSave={form.handleSubmit(onSubmit)}
             onClickReset={onReset}
           />
@@ -212,7 +216,12 @@ function InvoiceForm() {
         </div>
       </div>
       <div className="mt-4">
-        <FormActions isMobile onClickSave={form.handleSubmit(onSubmit)} onClickReset={onReset} />
+        <FormActions
+          isMobile
+          isLoading={Boolean(isLoading)}
+          onClickSave={form.handleSubmit(onSubmit)}
+          onClickReset={onReset}
+        />
       </div>
     </>
   );
