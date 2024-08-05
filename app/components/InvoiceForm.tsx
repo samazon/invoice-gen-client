@@ -1,11 +1,16 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { gql, useMutation } from '@apollo/client';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Form } from '@/components/ui/form';
 import { useContext, useEffect, useState } from 'react';
+import { InvoiceFormDefaults, InvoiceFormSchema } from '@/constants';
+import { Bounce, toast } from 'react-toastify';
+import { formatISO } from 'date-fns';
+import { filterItems } from '@/lib/utils';
 import FormActions from './FormActions';
 import SeactionHeader from './SectionHeader';
 import BillFromSection from './BillFromSection';
@@ -14,60 +19,59 @@ import { CountriesContext } from './CountriesContext';
 import InvoiceDetails from './InvoiceDetails';
 import ItemsListSection from './ItemsListSection';
 import PreviewSection from './PreviewSection';
+import ToastComponent from './ToastComponent';
 
-const invoiceSchema = z.object({
-  companyName: z.string().min(2, 'Required').trim(),
-  companyEmail: z.string().min(1, 'Required'),
-  country: z.string().min(1, 'Required'),
-  city: z.string().min(1, 'Required'),
-  postalCode: z.string().min(1, 'Required'),
-  streetAddress: z.string().min(1, 'Required'),
-  clientName: z.string().min(1, 'Required'),
-  clientEmail: z.string().min(1, 'Required').email('Invalid email.'),
-  clientCountry: z.string().min(1, 'Required'),
-  clientCity: z.string().min(1, 'Required'),
-  clientPostalCode: z.string().min(1, 'Required'),
-  clientStreetAddress: z.string().min(1, 'Required'),
-  invoiceDate: z.date(),
-  paymentTerms: z.string().min(1, 'Required'),
-  projectDescription: z.string().min(1, 'Required'),
-  items: z.array(
-    z.object({
-      name: z.string().min(1, 'Required'),
-      quantity: z.coerce.number().min(1, 'Required'),
-      price: z.coerce.number().min(1, 'Required'),
-      total: z.coerce.number().min(0, 'Required'),
-    }),
-  ),
-});
-
-const defaultValues = {
-  companyName: '',
-  companyEmail: '',
-  country: undefined,
-  city: '',
-  postalCode: '',
-  streetAddress: '',
-  clientName: '',
-  clientEmail: '',
-  clientCountry: '',
-  clientCity: '',
-  clientPostalCode: '',
-  clientStreetAddress: '',
-  invoiceDate: new Date(),
-  paymentTerms: '',
-  projectDescription: '',
-  items: [{ name: '', quantity: undefined, price: undefined, total: undefined }],
-};
+const CREATE_INVOICE = gql`
+  mutation CreateInvoice($input: CreateInvoiceInput!) {
+    createInvoice(input: $input) {
+      id
+      invoiceDate
+      projectDescription
+      subTotal
+      tax
+      totalAmount
+      billingFrom {
+        companyEmail
+        companyName
+        id
+        billingFromAddress {
+          city
+          country
+          postalCode
+          streetAddress
+        }
+      }
+      billingTo {
+        clientEmail
+        clientName
+        id
+        billingToAddress {
+          city
+          country
+          postalCode
+          streetAddress
+        }
+      }
+      items {
+        id
+        name
+        price
+        quantity
+        totalPrice
+      }
+      paymentTerms
+    }
+  }
+`;
 
 function InvoiceForm() {
   const { countries } = useContext(CountriesContext);
   const [subTotal, setSubTotal] = useState(0);
   const [total, setTotal] = useState(0);
 
-  const form = useForm<z.infer<typeof invoiceSchema>>({
-    resolver: zodResolver(invoiceSchema),
-    defaultValues,
+  const form = useForm<z.infer<typeof InvoiceFormSchema>>({
+    resolver: zodResolver(InvoiceFormSchema),
+    defaultValues: InvoiceFormDefaults,
   });
 
   const itemsWatch = useWatch({ control: form.control, name: 'items' });
@@ -77,12 +81,61 @@ function InvoiceForm() {
     name: 'items',
   });
 
-  const onSubmit = (values: z.infer<typeof invoiceSchema>) => {
-    console.log(values);
+  const [createInvoice] = useMutation(CREATE_INVOICE);
+
+  const onSubmit = async (values: z.infer<typeof InvoiceFormSchema>) => {
+    const filteredItems = filterItems(values.items);
+    const invoiceData = {
+      input: {
+        createInvoiceAttributes: {
+          paymentTerms: String(values.paymentTerm).toUpperCase().split(' ').join('_'),
+          projectDescription: values.projectDescription,
+          billingToAttributes: {
+            clientName: values.companyName,
+            clientEmail: values.companyEmail,
+            billingToAddressAttributes: {
+              streetAddress: values.clientStreetAddress,
+              city: values.clientCity,
+              country: values.clientCountry,
+              postalCode: values.clientPostalCode,
+            },
+          },
+          billingFromAttributes: {
+            billingFromAddressAttributes: {
+              streetAddress: values.streetAddress,
+              city: values.city,
+              country: values.country,
+              postalCode: values.postalCode,
+            },
+            companyEmail: values.companyEmail,
+            companyName: values.companyName,
+          },
+          itemAttributes: filteredItems,
+          invoiceDate: formatISO(values.invoiceDate),
+        },
+        clientMutationId: 'unique-client-id-123',
+      },
+    };
+
+    try {
+      const response = await createInvoice({ variables: invoiceData });
+      if (Object.keys(response.data).length > 0) {
+        toast(<ToastComponent />, {
+          position: 'top-right',
+          autoClose: 2000,
+          theme: 'light',
+          transition: Bounce,
+        });
+      }
+    } catch (err) {
+      toast('Error creating invoice', { type: 'error' });
+    } finally {
+      form.reset(InvoiceFormDefaults);
+    }
   };
 
   const onReset = () => {
-    form.reset(defaultValues);
+    form.reset(InvoiceFormDefaults);
   };
 
   useEffect(() => {
@@ -138,7 +191,7 @@ function InvoiceForm() {
           <h3 className="mb-4 text-2xl font-[600] text-[#101828]">Preview</h3>
           <PreviewSection
             invoiceDate={String(form.watch('invoiceDate'))}
-            paymentTerm={form.watch('paymentTerms')}
+            paymentTerm={form.watch('paymentTerm')}
             items={form.watch('items')}
             companyName={form.watch('companyName')}
             companyEmail={form.watch('companyEmail')}
