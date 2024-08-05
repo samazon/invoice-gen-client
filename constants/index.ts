@@ -25,7 +25,7 @@ export const InvoiceFormSchema = z.object({
       name: z.string().min(1, 'Required'),
       quantity: z.coerce.number({ invalid_type_error: 'Required' }).min(1, 'Required'),
       price: z.coerce.number({ invalid_type_error: 'Required' }).min(1, 'Required'),
-      total: z.coerce.number({ invalid_type_error: 'Required' }),
+      total: z.coerce.number({ invalid_type_error: '' }),
     }),
   ),
 });
