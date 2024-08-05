@@ -61,7 +61,7 @@ const InvoiceDetails = ({ form }: Props) => {
         />
         <FormField
           control={form.control}
-          name="paymentTerms"
+          name="paymentTerm"
           render={({ field }) => (
             <FormItem className="w-full sm:w-1/2">
               <FormLabel htmlFor="paymentTerms">Payment terms</FormLabel>
