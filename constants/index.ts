@@ -6,7 +6,7 @@ export const GRAPHQL_ENDPOINT_URL =
 
 export const InvoiceFormSchema = z.object({
   companyName: z.string().min(2, 'Required').trim(),
-  companyEmail: z.string().min(1, 'Required'),
+  companyEmail: z.string().min(1, 'Required').email('Invalid email.'),
   country: z.string().min(1, 'Required'),
   city: z.string().min(1, 'Required'),
   postalCode: z.string().min(1, 'Required'),
